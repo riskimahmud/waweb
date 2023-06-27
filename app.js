@@ -5,7 +5,6 @@ const socketIO = require("socket.io");
 const http = require("http");
 const { body, validationResult } = require("express-validator");
 const { phoneNumberFormatter } = require("./helpers/formatter");
-const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
