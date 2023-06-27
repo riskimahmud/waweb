@@ -1,16 +1,11 @@
-const {
-  Client,
-  Location,
-  List,
-  Buttons,
-  LocalAuth,
-} = require("whatsapp-web.js");
+const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode");
 const express = require("express");
 const socketIO = require("socket.io");
 const http = require("http");
 const { body, validationResult } = require("express-validator");
 const { phoneNumberFormatter } = require("./helpers/formatter");
+const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
@@ -25,7 +20,7 @@ app.get("/", (req, res) => {
 
 const client = new Client({
   authStrategy: new LocalAuth(),
-  // proxyAuthentication: { username: 'username', password: 'password' },
+  proxyAuthentication: { username: "username", password: "password" },
   puppeteer: {
     args: [
       "--no-sandbox",
@@ -85,10 +80,15 @@ io.on("connection", function (socket) {
   });
 
   //   get message
-  //   client.on("message", async (msg) => {
-  // console.log("MESSAGE RECEIVED", msg);
-  //     socket.emit("message", "Pesan Masuk : " + msg.body);
-  //   });
+  client.on("message", async (msg) => {
+    // console.log("MESSAGE RECEIVED", msg);
+    client.sendMessage(
+      msg.from,
+      "Hai. Harap simpan nomor ini agar tidak diblokir oleh pihak WhatsApp.\nSaya hanya akan mengirimkan Notifikasi."
+    );
+    socket.emit("message", "Pesan Masuk : " + msg.body);
+    // logToFile("Pesan Masuk : " + msg.body);
+  });
 });
 
 // cek register number
@@ -123,20 +123,25 @@ app.post(
       });
     }
 
-    client
-      .sendMessage(number, message)
-      .then((response) => {
-        res.status(200).json({
-          status: true,
-          response: response,
+    if (client.info === undefined) {
+      console.log("the system is not ready yet");
+    } else {
+      // client.sendMessage(phn, msg);
+      client
+        .sendMessage(number, message)
+        .then((response) => {
+          res.status(200).json({
+            status: true,
+            response: response,
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            status: false,
+            response: err,
+          });
         });
-      })
-      .catch((err) => {
-        res.status(500).json({
-          status: false,
-          response: err,
-        });
-      });
+    }
   }
 );
 

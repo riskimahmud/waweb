@@ -4,13 +4,44 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Whatsapp API</title>
+    <title>WhatsApp API</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      #app {
+        text-align: center;
+      }
+
+      h1 {
+        margin-top: 0;
+      }
+
+      img#qrcode {
+        width: 200px;
+        height: 200px;
+        margin-bottom: 20px;
+      }
+
+      .logs {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+      }
+
+      .logs li {
+        margin-bottom: 5px;
+      }
+    </style>
   </head>
   <body>
     <div id="app">
-      <h1>Whatsapp API</h1>
+      <h1>WhatsApp API</h1>
       <p>Powered by Riski Mahmud</p>
-      <img src="" alt="qrcode" id="qrcode" />
+      <img src="" alt="QR Code" id="qrcode" />
       <h3>Logs</h3>
       <ul class="logs"></ul>
     </div>
@@ -34,21 +65,25 @@
         });
 
         socket.on("message", function (msg) {
-          // console.log(msg);
-          $(".logs").prepend($("<li>").text(msg));
+          var logs = $(".logs");
+
+          // Batasi jumlah log yang ditampilkan
+          if (logs.children().length >= 10) {
+            logs.children().last().remove();
+          }
+
+          logs.prepend($("<li>").text(msg));
         });
 
         socket.on("qr", function (src) {
-          $("#qrcode").attr("src", src);
+          $("#qrcode").attr("src", src).show();
         });
 
-        // ready
-        socket.on("ready", function (e) {
+        socket.on("ready", function () {
           $("#qrcode").hide();
         });
 
-        // authenticated
-        socket.on("authenticated", function (e) {
+        socket.on("authenticated", function () {
           $("#qrcode").hide();
         });
       });
